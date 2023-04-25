@@ -10,13 +10,6 @@
       - ldap-utils
       - python-ldap
 
-- name: Don't check CA
-  lineinfile:
-    create: true
-    path: /etc/ldap/ldap.conf
-    regexp: '^TLS_REQCERT'
-    line: TLS_REQCERT never
-
 - name: Start ldap service
   service:
     name: slapd
