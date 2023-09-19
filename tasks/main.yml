@@ -1,4 +1,12 @@
 ---
+# Variable setup.
+- name: Include distribution and version-specific vars.
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      skip: true
+
 - name: Install required packages
   apt:
     name: "{{packages}}"
@@ -8,7 +16,7 @@
     packages:
       - slapd
       - ldap-utils
-      - python-ldap
+      - "{{ python_package }}"
 
 - name: Start ldap service
   service:
@@ -96,7 +104,7 @@
   with_items: "{{ldap_groups}}"
 
 - name: Add users to groups
-  ldap_attr:
+  ldap_attrs:
     server_uri: "{{ldap_server_uri}}"
     bind_dn: "{{ldap_basedn}}"
     bind_pw: "{{ldap_bind_pw}}"
@@ -109,7 +117,7 @@
     - members
 
 - name: Remove dummy entry
-  ldap_attr:
+  ldap_attrs:
     server_uri: "{{ldap_server_uri}}"
     bind_dn: "{{ldap_basedn}}"
     bind_pw: "{{ldap_bind_pw}}"
