@@ -4,3 +4,4 @@ dbconfig_path: /usr/share/slapd/DB_CONFIG
 schema_path: /etc/ldap/schema
 ldap_users: []
 ldap_groups: []
+gestionnaire_service: auto

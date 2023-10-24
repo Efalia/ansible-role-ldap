@@ -1,4 +1,12 @@
 ---
+# Variable setup.
+- name: Include distribution and version-specific vars.
+  include_vars: "{{ item }}"
+  with_first_found:
+    - files:
+        - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+      skip: true
+
 - name: Install required packages
   apt:
     name: "{{packages}}"
@@ -8,7 +16,7 @@
     packages:
       - slapd
       - ldap-utils
-      - python-ldap
+      - "{{ python_package }}"
 
 - name: Start ldap service
   service:
@@ -95,31 +103,12 @@
       uniqueMember: "uid=dummy,ou=people,{{ldap_basedn}}"
   with_items: "{{ldap_groups}}"
 
-- name: Add users to groups
-  ldap_attr:
-    server_uri: "{{ldap_server_uri}}"
-    bind_dn: "{{ldap_basedn}}"
-    bind_pw: "{{ldap_bind_pw}}"
-    dn: "cn={{item.0.name}},ou=groups,{{ldap_basedn}}"
-    name: uniqueMember
-    values: "uid={{item.1}},ou=people,{{ldap_basedn}}"
-    state: present
-  with_subelements:
-    - "{{ldap_groups}}"
-    - members
-
-- name: Remove dummy entry
-  ldap_attr:
-    server_uri: "{{ldap_server_uri}}"
-    bind_dn: "{{ldap_basedn}}"
-    bind_pw: "{{ldap_bind_pw}}"
-    dn: "cn={{item.name}},ou=groups,{{ldap_basedn}}"
-    name: uniqueMember
-    values: "uid=dummy,ou=people,{{ldap_basedn}}"
-    state: absent
-  with_items: "{{ldap_groups}}"
+- name: Include task list in play
+  include_tasks:
+    file: "{{ ansible_distribution|title }}-{{ ansible_distribution_version.split('.')[0] }}.yml"
 
 - name: Restart ldap service
   service:
     name: slapd
     state: restarted
+    use: "{{ gestionnaire_service }}"
