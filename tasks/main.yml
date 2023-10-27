@@ -111,4 +111,3 @@
   service:
     name: slapd
     state: restarted
-    use: "{{ gestionnaire_service }}"
