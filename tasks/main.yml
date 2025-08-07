@@ -111,3 +111,4 @@
   service:
     name: slapd
     state: restarted
+  ignore_errors: true
